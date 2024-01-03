@@ -16,6 +16,48 @@
   Once you've implemented the logic, test your code by running
 */
 
-class Calculator {}
+class Calculator {
+  constructor() {
+    this.result = 0;
+  }
+
+  add(number) {
+    this.result += number;
+  }
+
+  subtract(number) {
+    this.result -= number;
+  }
+
+  multiply(number) {
+    this.result *= number;
+  }
+
+  divide(number) {
+    this.result /= number;
+  }
+
+  clear() {
+    this.result = 0;
+  }
+
+  getResult() {
+    return this.result;
+  }
+
+  calculate(s) {
+    let stringWithoutSpaces = s.replace(/\s/g, "");
+
+    let map = new Map();
+
+    map.set("+", "add");
+    map.set("-", "subtract");
+    map.set("*", "multiply");
+    map.set("/", "divide");
+
+    for (let i in stringWithoutSpaces) {
+    }
+  }
+}
 
 module.exports = Calculator;
