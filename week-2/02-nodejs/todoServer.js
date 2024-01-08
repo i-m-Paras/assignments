@@ -39,11 +39,102 @@
 
   Testing the server - run `npm run test-todoServer` command in terminal
  */
-  const express = require('express');
-  const bodyParser = require('body-parser');
-  
-  const app = express();
-  
-  app.use(bodyParser.json());
-  
-  module.exports = app;
+const express = require("express");
+const bodyParser = require("body-parser");
+const fs = require("fs");
+
+const app = express();
+
+app.use(bodyParser.json());
+
+app.get("/todos", (req, res) => {
+  fs.readFile("todos.json", "utf-8", (err, data) => {
+    if (err) throw err;
+    else res.status(200).json(JSON.parse(data));
+  });
+});
+
+app.post("/todos", (req, res) => {
+  const data = req.body;
+
+  fs.readFile("count.txt", "utf-8", (err, count) => {
+    if (err) throw err;
+    const finalTodo = {
+      id: count,
+      todos: data,
+    };
+
+    var newCount = parseInt(count);
+    newCount++;
+
+    fs.writeFile("count.txt", newCount.toString(), "utf-8", (err) => {
+      if (err) throw err;
+
+      fs.readFile("todos.json", "utf-8", async (err, todo) => {
+        if (err) throw err;
+
+        const newTodo = JSON.parse(todo);
+        newTodo.push(finalTodo);
+        fs.writeFile("todos.json", JSON.stringify(newTodo), "utf-8", (err) => {
+          if (err) throw err;
+          res.send("Saved!");
+        });
+      });
+    });
+  });
+});
+
+app.put("/todos/:id", (req, res) => {
+  const todoId = req.params.id;
+
+  const { title, completed, description } = req.body;
+  fs.readFile("todos.json", "utf-8", (err, todos) => {
+    if (err) throw err;
+    todos = JSON.parse(todos);
+
+    const index = todos.findIndex((todo) => todo.id === todoId);
+
+    if (index === -1) {
+      res.status(404).send("todo not found!");
+    } else {
+      todos[index].todos = {
+        title: title !== undefined ? title : todos[index].todos.title,
+        completed:
+          completed !== undefined ? completed : todos[index].todos.completed,
+        description:
+          description !== undefined
+            ? description
+            : todos[index].todos.description,
+      };
+      fs.writeFile("todos.json", JSON.stringify(todos), "utf-8", (err) => {
+        if (err) throw err;
+        res.status(200).send("Saved!");
+      });
+    }
+  });
+});
+
+app.delete("/todos/:id", (req, res) => {
+  const todoId = req.params.id;
+  fs.readFile("todos.json", "utf-8", (err, todos) => {
+    if (err) throw err;
+    todos = JSON.parse(todos);
+
+    const index = todos.findIndex((todo) => todo.id === todoId);
+
+    if (index === -1) {
+      res.status(404).send("todo not found!");
+    } else {
+      todos.splice(index, 1);
+
+      fs.writeFile("todos.json", JSON.stringify(todos), "utf-8", (err) => {
+        if (err) throw err;
+        res.status(200).send("Deleted!");
+      });
+    }
+  });
+});
+
+app.listen(3000);
+
+module.exports = app;
