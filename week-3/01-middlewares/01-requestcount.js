@@ -1,6 +1,6 @@
-const request = require('supertest');
-const assert = require('assert');
-const express = require('express');
+const request = require("supertest");
+const assert = require("assert");
+const express = require("express");
 
 const app = express();
 let requestCount = 0;
@@ -9,17 +9,23 @@ let requestCount = 0;
 // Your task is to create a global middleware (app.use) which will
 // maintain a count of the number of requests made to the server in the global
 // requestCount variable
-
-app.get('/user', function(req, res) {
-  res.status(200).json({ name: 'john' });
+let count = 0;
+app.use((req, res, next) => {
+  count++;
+  next();
 });
 
-app.post('/user', function(req, res) {
-  res.status(200).json({ msg: 'created dummy user' });
+app.get("/user", function (req, res) {
+  res.status(200).json({ name: "john" });
 });
 
-app.get('/requestCount', function(req, res) {
-  res.status(200).json({ requestCount });
+app.post("/user", function (req, res) {
+  res.status(200).json({ msg: "created dummy user" });
 });
 
+app.get("/requestCount", function (req, res) {
+  res.status(200).json({ requestCount: count });
+});
+
+app.listen(3000);
 module.exports = app;

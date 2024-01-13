@@ -1,6 +1,6 @@
-const request = require('supertest');
-const assert = require('assert');
-const express = require('express');
+const request = require("supertest");
+const assert = require("assert");
+const express = require("express");
 const app = express();
 // You have been given an express server which has a few endpoints.
 // Your task is to create a global middleware (app.use) which will
@@ -11,17 +11,39 @@ const app = express();
 // You have been given a numberOfRequestsForUser object to start off with which
 // clears every one second
 
-let numberOfRequestsForUser = {};
-setInterval(() => {
-    numberOfRequestsForUser = {};
-}, 1000)
+let numberOfRequestsForUser = {
+  user_id: "",
+  count: 0,
+};
 
-app.get('/user', function(req, res) {
-  res.status(200).json({ name: 'john' });
+setInterval(() => {
+  // Reset the count for each user
+  numberOfRequestsForUser = {
+    user_id: "",
+    count: 0,
+  };
+}, 1000);
+
+app.use((req, res, next) => {
+  // Use a closure to capture the reference to numberOfRequestsForUser
+  const userRequests = numberOfRequestsForUser;
+
+  userRequests.user_id = req.headers["user-id"];
+  userRequests.count++;
+
+  if (userRequests.count >= 5) {
+    return res.status(404).send("Rate Limit");
+  }
+
+  next();
 });
 
-app.post('/user', function(req, res) {
-  res.status(200).json({ msg: 'created dummy user' });
+app.get("/user", function (req, res) {
+  res.status(200).json({ name: "john" });
+});
+
+app.post("/user", function (req, res) {
+  res.status(200).json({ msg: "created dummy user" });
 });
 
 module.exports = app;
